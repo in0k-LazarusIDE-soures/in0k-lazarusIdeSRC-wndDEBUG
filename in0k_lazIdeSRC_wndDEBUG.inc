@@ -11,6 +11,10 @@ procedure IdeLazarus_CLEAR;
 procedure DEBUG(const         msgTEXT:string);
 procedure DEBUG(const msgTYPE,msgTEXT:string);
 
+procedure in0k_lazIde_DEBUG(const         msgTEXT:string);
+procedure in0k_lazIde_DEBUG(const msgTYPE,msgTEXT:string);
+
+
 
 type pMethod=^tMethod;
 
@@ -71,6 +75,18 @@ begin
     if msgTYPE<>''
     then DEBUG(_c_bOPN_+msgTYPE+_c_bCLS_+_c_PRBL_+msgTEXT)
     else DEBUG(                                   msgTEXT);
+end;
+
+//------------------------------------------------------------------------------
+
+procedure in0k_lazIde_DEBUG(const msgTEXT:string);
+begin
+    DEBUG(msgTEXT);
+end;
+
+procedure in0k_lazIde_DEBUG(const msgTYPE,msgTEXT:string);
+begin
+    DEBUG(msgTYPE,msgTEXT);
 end;
 
 {%region --- Pointer to TEXT -------------------------------------- /fold}
