@@ -8,7 +8,7 @@ object Wnd_DEBUG: TWnd_DEBUG
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
-  LCLVersion = '1.6.0.1'
+  LCLVersion = '1.6.0.2'
   object Memo1: TMemo
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -20,8 +20,9 @@ object Wnd_DEBUG: TWnd_DEBUG
     Top = 0
     Width = 320
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ScrollBars = ssBoth
+    ScrollBars = ssAutoBoth
     TabOrder = 0
+    WordWrap = False
   end
   object Button1: TButton
     AnchorSideLeft.Control = Owner
