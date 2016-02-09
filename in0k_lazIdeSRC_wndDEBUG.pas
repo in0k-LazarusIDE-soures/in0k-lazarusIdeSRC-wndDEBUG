@@ -4,15 +4,11 @@ unit in0k_lazIdeSRC_wndDEBUG;
 
 interface
 
-uses Classes, SysUtils,
-     Controls, StdCtrls, ActnList,
-     Forms,
-     LCLProc, BaseIDEIntf, LazConfigStorage,
+uses Classes, SysUtils, Controls, StdCtrls, ActnList, Forms,
+     LCLProc, BaseIDEIntf, LazConfigStorage, //< для настроек
      IDEWindowIntf; //< да ... необходимо использовать IdeINTf
 
 TYPE
-
-  { TWnd_DEBUG }
 
   TWnd_DEBUG = class(TForm)
     a_StayOnTop: TAction;
@@ -41,12 +37,9 @@ TYPE
     procedure Message(const TextMSG:string);
   end;
 
-
 implementation
 
 {$R *.lfm}
-
-const _c_text_Line_='---------------------------------------------------------------------------------';
 
 constructor TWnd_DEBUG.Create(TheOwner:TComponent; const pkgClassNAME,pkgNAME:string);
 begin
@@ -59,13 +52,6 @@ procedure TWnd_DEBUG.FormCreate(Sender: TObject);
 begin
     FormStyle:=fsStayOnTop;
     Memo1.Clear;
-end;
-
-procedure TWnd_DEBUG.FormShow(Sender: TObject);
-begin
-   _settings_Load_;
-    if (memo1.Lines.Count>0)and(lstString<>_c_text_Line_)
-    then AddString(_c_text_Line_)
 end;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -84,8 +70,19 @@ begin
 end;
 
 procedure TWnd_DEBUG.a_StayOnTopUpdate(Sender: TObject);
-begin // ????
+begin
     tAction(Sender).Checked:=(self.FormStyle=fsStayOnTop);
+end;
+
+//------------------------------------------------------------------------------
+
+const _c_text_Line_='---------------------------------------------------------------------------------';
+
+procedure TWnd_DEBUG.FormShow(Sender: TObject);
+begin
+   _settings_Load_;
+    if (memo1.Lines.Count>0)and(lstString<>_c_text_Line_)
+    then AddString(_c_text_Line_)
 end;
 
 procedure TWnd_DEBUG.FormClose(Sender:TObject; var CloseAction:TCloseAction);
@@ -95,9 +92,9 @@ begin
    _settings_Save_;
 end;
 
-
 //------------------------------------------------------------------------------
 
+// последняя вставленная строка (парная с `AddString`)
 function TWnd_DEBUG.lstString:string;
 begin
     result:='';
@@ -108,6 +105,7 @@ begin
     end;
 end;
 
+// добавить строку (парная с `lstString`)
 procedure TWnd_DEBUG.AddString(const TextMSG:string);
 begin
     with memo1 do begin
@@ -134,10 +132,7 @@ begin
     end;
 end;
 
-
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
+//--- про настройки окошка -----------------------------------------------------
 
 const _c_settings_EXT_='.xml';
       _c_settings_NAME_StayOnTOP_='StayOnTOP';
@@ -145,38 +140,29 @@ const _c_settings_EXT_='.xml';
 procedure TWnd_DEBUG._settings_Save_;
 var Config: TConfigStorage;
 begin
-    try
-        Config:=GetIDEConfigStorage(self.Name+_c_settings_EXT_,false);
-        try
-            // --- галочка
+    try Config:=GetIDEConfigStorage(self.Name+_c_settings_EXT_,false);
+        try // --- галочка
             Config.SetDeleteValue(_c_settings_NAME_StayOnTOP_,CheckBox1.Checked,false);
             // --- размер
             Config.SetDeleteValue('',self.BoundsRect,Rect(0,0,0,0));
-        finally
-          Config.Free;
-        end;
-    except
-    end;
+        finally Config.Free; end;
+    except {жестоко как-то, мож по изящнее надо?} end;
 end;
 
 procedure TWnd_DEBUG._settings_Load_;
 var Config: TConfigStorage;
     r:trect;
 begin
-    try
-        Config:=GetIDEConfigStorage(self.Name+_c_settings_EXT_,true);
-        try
-            // --- галочка
+    try Config:=GetIDEConfigStorage(self.Name+_c_settings_EXT_,true);
+        try // --- галочка
             Config.GetValue(_c_settings_NAME_StayOnTOP_,CheckBox1.Checked);
             // --- размер
             Config.GetValue('',r,self.BoundsRect);
             self.BoundsRect:=r;
             // мож тут проверку какйю ???
             // if screen.DesktopRect.Left:=;
-        finally
-          Config.Free;
-        end;
-    except end;
+        finally Config.Free; end;
+    except {жестоко как-то, мож по изящнее надо?} end;
 end;
 
 end.
