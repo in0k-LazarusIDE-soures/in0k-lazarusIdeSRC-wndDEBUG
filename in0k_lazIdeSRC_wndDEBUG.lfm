@@ -2,9 +2,9 @@ object Wnd_DEBUG: TWnd_DEBUG
   Left = 515
   Height = 240
   Top = 221
-  Width = 320
+  Width = 504
   ClientHeight = 240
-  ClientWidth = 320
+  ClientWidth = 504
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -18,7 +18,7 @@ object Wnd_DEBUG: TWnd_DEBUG
     Left = 0
     Height = 215
     Top = 0
-    Width = 320
+    Width = 504
     Anchors = [akTop, akLeft, akRight, akBottom]
     ScrollBars = ssAutoBoth
     TabOrder = 0
@@ -41,7 +41,7 @@ object Wnd_DEBUG: TWnd_DEBUG
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 245
+    Left = 429
     Height = 25
     Top = 215
     Width = 75
@@ -62,6 +62,19 @@ object Wnd_DEBUG: TWnd_DEBUG
     BorderSpacing.Left = 2
     TabOrder = 3
   end
+  object CheckBox2: TCheckBox
+    AnchorSideLeft.Control = CheckBox1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = CheckBox1
+    AnchorSideTop.Side = asrCenter
+    Left = 164
+    Height = 19
+    Top = 218
+    Width = 91
+    Action = a_FreeOnClose
+    BorderSpacing.Left = 2
+    TabOrder = 4
+  end
   object ActionList1: TActionList
     left = 257
     top = 40
@@ -76,7 +89,10 @@ object Wnd_DEBUG: TWnd_DEBUG
     object a_StayOnTop: TAction
       Caption = 'Stay On Top'
       OnExecute = a_StayOnTopExecute
-      OnUpdate = a_StayOnTopUpdate
+    end
+    object a_FreeOnClose: TAction
+      Caption = 'Free on Close'
+      OnExecute = a_FreeOnCloseExecute
     end
   end
 end

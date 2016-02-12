@@ -1,16 +1,15 @@
 unit in0k_lazIdeSRC_wndDEBUG;
 
 {$mode objfpc}{$H+}
-
 interface
 
 uses Classes, SysUtils, Controls, StdCtrls, ActnList, Forms,
-     LCLProc, BaseIDEIntf, LazConfigStorage, //< для настроек
-     IDEWindowIntf; //< да ... необходимо использовать IdeINTf
+     BaseIDEIntf, LazConfigStorage; //< для настроек
 
 TYPE
 
   TWnd_DEBUG = class(TForm)
+    a_FreeOnClose: TAction;
     a_StayOnTop: TAction;
     a_Clear: TAction;
     a_Save: TAction;
@@ -18,13 +17,14 @@ TYPE
     Button1: TButton;
     Button2: TButton;
     CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
     Memo1: TMemo;
     procedure a_ClearExecute(Sender: TObject);
+    procedure a_FreeOnCloseExecute(Sender: TObject);
     procedure a_StayOnTopExecute(Sender: TObject);
-    procedure a_StayOnTopUpdate(Sender: TObject);
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure FormCreate(Sender: TObject);
-    procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender:TObject; var CloseAction:TCloseAction);
+    procedure FormCreate(Sender:TObject);
+    procedure FormShow(Sender:TObject);
   protected
     function  lstString:string; inline;
     procedure AddString(const TextMSG:string); inline;
@@ -32,7 +32,7 @@ TYPE
     procedure _settings_Save_;
     procedure _settings_Load_;
   public
-    constructor {%H-}Create(TheOwner:TComponent; const pkgClassNAME,pkgNAME:string);
+    constructor {%H-}Create(TheOwner:TComponent; const pkgClassNAME, newCaption:string);
   public
     procedure Message(const TextMSG:string);
   end;
@@ -41,54 +41,60 @@ implementation
 
 {$R *.lfm}
 
-constructor TWnd_DEBUG.Create(TheOwner:TComponent; const pkgClassNAME,pkgNAME:string);
+const _c_text_Line_='---------------------------------------------------------------------------------';
+
+const _c_welcome_text_=
+'   ВНИМАНИЕ !!!'+LineEnding+
+'   Чем БОЛЬШЕ строк в этом окне, тем тормазнутее работает IDE Lazarus.'+LineEnding+
+   _c_text_Line_;
+
+constructor TWnd_DEBUG.Create(TheOwner:TComponent; const pkgClassNAME,newCaption:string);
 begin
     inherited Create(TheOwner);
-    self.Name:=self.ClassName+'_'+pkgClassNAME;
-    self.Caption  :=pkgNAME;
+    self.Name   := self.ClassName +'_'+pkgClassNAME; //< ОБЯЗАТЕЛЬНО
+    self.Caption:= newCaption;
 end;
 
 procedure TWnd_DEBUG.FormCreate(Sender: TObject);
 begin
-    FormStyle:=fsStayOnTop;
-    Memo1.Clear;
-end;
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-procedure TWnd_DEBUG.a_ClearExecute(Sender: TObject);
-begin
-    memo1.Clear;
-end;
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-procedure TWnd_DEBUG.a_StayOnTopExecute(Sender: TObject);
-begin
-    if self.FormStyle=fsStayOnTop then self.FormStyle:=fsNormal
-    else self.FormStyle:=fsStayOnTop;
-end;
-
-procedure TWnd_DEBUG.a_StayOnTopUpdate(Sender: TObject);
-begin
-    tAction(Sender).Checked:=(self.FormStyle=fsStayOnTop);
+   _settings_Load_;
+    Memo1.Text:=_c_welcome_text_;
 end;
 
 //------------------------------------------------------------------------------
 
-const _c_text_Line_='---------------------------------------------------------------------------------';
-
 procedure TWnd_DEBUG.FormShow(Sender: TObject);
 begin
-   _settings_Load_;
     if (memo1.Lines.Count>0)and(lstString<>_c_text_Line_)
     then AddString(_c_text_Line_)
 end;
 
 procedure TWnd_DEBUG.FormClose(Sender:TObject; var CloseAction:TCloseAction);
 begin
+   _settings_Save_;
     inherited;
-    CloseAction:=caHide;
+    if CheckBox2.Checked
+    then CloseAction:=caFree
+    else CloseAction:=caHide;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TWnd_DEBUG.a_ClearExecute(Sender: TObject);
+begin
+    memo1.Clear;
+end;
+
+procedure TWnd_DEBUG.a_FreeOnCloseExecute(Sender: TObject);
+begin
+   _settings_Save_;
+end;
+
+procedure TWnd_DEBUG.a_StayOnTopExecute(Sender: TObject);
+begin
+    if CheckBox1.Checked
+    then self.FormStyle:=fsStayOnTop
+    else self.FormStyle:=fsNormal;
    _settings_Save_;
 end;
 
@@ -136,13 +142,15 @@ end;
 
 const _c_settings_EXT_='.xml';
       _c_settings_NAME_StayOnTOP_='StayOnTOP';
+      _c_settings_NAME_FreeCLOSE_='FreeOnCLOSE';
 
 procedure TWnd_DEBUG._settings_Save_;
 var Config: TConfigStorage;
 begin
     try Config:=GetIDEConfigStorage(self.Name+_c_settings_EXT_,false);
-        try // --- галочка
+        try // --- галочки
             Config.SetDeleteValue(_c_settings_NAME_StayOnTOP_,CheckBox1.Checked,false);
+            Config.SetDeleteValue(_c_settings_NAME_FreeCLOSE_,CheckBox2.Checked,false);
             // --- размер
             Config.SetDeleteValue('',self.BoundsRect,Rect(0,0,0,0));
         finally Config.Free; end;
@@ -154,8 +162,9 @@ var Config: TConfigStorage;
     r:trect;
 begin
     try Config:=GetIDEConfigStorage(self.Name+_c_settings_EXT_,true);
-        try // --- галочка
-            Config.GetValue(_c_settings_NAME_StayOnTOP_,CheckBox1.Checked);
+        try // --- галочки
+            CheckBox1.Checked:=Config.GetValue(_c_settings_NAME_StayOnTOP_,true);
+            CheckBox2.Checked:=Config.GetValue(_c_settings_NAME_FreeCLOSE_,false);
             // --- размер
             Config.GetValue('',r,self.BoundsRect);
             self.BoundsRect:=r;
