@@ -155,7 +155,7 @@ end;
 
 function inttostr(const v:integer):string; inline;
 begin
-    sysutils.IntToStr(v);
+    result:=sysutils.IntToStr(v);
 end;
 
 {%region --- Pointer to TEXT -------------------------------------- /fold}
