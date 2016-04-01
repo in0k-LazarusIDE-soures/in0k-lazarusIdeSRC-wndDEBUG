@@ -5,8 +5,8 @@ uses Forms, sysutils,
      in0k_lazIdeSRC_wndDEBUG,
      IDEWindowIntf, MenuIntf; //< да ... необходимо использовать IdeINTf
 
-procedure IdeLazarus_SetUP (const pkgClassNAME:string);
-procedure IdeLazarus_CLEAR;
+procedure LazarusIDE_SetUP (const pkgClassNAME:string);
+procedure LazarusIDE_CLEAR;
 
 procedure in0k_lazIde_DEBUG(const         msgTEXT:string);
 procedure in0k_lazIde_DEBUG(const msgTYPE,msgTEXT:string);
@@ -107,7 +107,7 @@ var _WndDBG_manager_:_tWndDBG_manager_;
 
 //------------------------------------------------------------------------------
 
-procedure IdeLazarus_SetUP(const pkgClassNAME:string);
+procedure LazarusIDE_SetUP(const pkgClassNAME:string);
 begin
     if not Assigned(_WndDBG_manager_) then begin
         // создаем САМО окно
@@ -117,7 +117,7 @@ begin
     end;
 end;
 
-procedure IdeLazarus_CLEAR;
+procedure LazarusIDE_CLEAR;
 begin
    _WndDBG_manager_.FREE;
 end;
