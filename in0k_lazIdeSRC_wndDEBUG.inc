@@ -35,12 +35,12 @@ _tWndDBG_manager_=class
   protected
    _WndDBG_:TWnd_DEBUG;
    _pkgName_:string;
-    procedure _WndDBG_onDestroy_(Sender: TObject);
+    procedure _WndDBG_onDestroy_({%H-}Sender:TObject);
   public
     function  wndCaption:string;
     procedure MessageDBG(const MSG:string);
     procedure ShowWindow;
-    procedure onClick_ShowWindow(Sender: TObject); //< это для меню
+    procedure onClick_ShowWindow({%H-}Sender:TObject); //< это для меню
   public
     constructor Create(const pkgClassName:string);
     destructor DESTROY; override;

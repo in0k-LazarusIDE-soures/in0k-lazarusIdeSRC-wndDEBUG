@@ -19,12 +19,12 @@ TYPE
     CheckBox1: TCheckBox;
     CheckBox2: TCheckBox;
     Memo1: TMemo;
-    procedure a_ClearExecute(Sender: TObject);
-    procedure a_FreeOnCloseExecute(Sender: TObject);
-    procedure a_StayOnTopExecute(Sender: TObject);
-    procedure FormClose(Sender:TObject; var CloseAction:TCloseAction);
-    procedure FormCreate(Sender:TObject);
-    procedure FormShow(Sender:TObject);
+    procedure FormCreate          ({%H-}Sender:TObject);
+    procedure FormShow            ({%H-}Sender:TObject);
+    procedure FormClose           ({%H-}Sender:TObject; var CloseAction:TCloseAction);
+    procedure a_ClearExecute      ({%H-}Sender: TObject);
+    procedure a_FreeOnCloseExecute({%H-}Sender: TObject);
+    procedure a_StayOnTopExecute  ({%H-}Sender: TObject);
   protected
     function  lstString:string; inline;
     procedure AddString(const TextMSG:string); inline;
