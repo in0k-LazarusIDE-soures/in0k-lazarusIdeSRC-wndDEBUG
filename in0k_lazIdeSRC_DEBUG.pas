@@ -26,7 +26,7 @@ function  mthd2txt(const p:pMethod):string; inline;
 function  inttostr(const v:integer):string; inline;
 
 
-
+{$define _DEBUG_}
 
 implementation
 
@@ -158,15 +158,19 @@ _tWndDBG_manager_=class
     procedure _WndDBG_chbStayOnTOP_onClick_(Sender: TObject);
     procedure _WndDBG_chbFreeOnCLOSE_onClick_(Sender: TObject);
   protected
-    procedure _WndDBG_settings_SAVE_;
-    procedure _WndDBG_settings_LOAD_;
-  protected
     procedure _WndDBG_onShow_ (Sender: TObject);
     procedure _WndDBG_onClose_(Sender:TObject; var CloseAction:TCloseAction);
     procedure _WndDBG_onDestroy_({%H-}Sender:TObject);
   protected
+    procedure _WndDBG_visualControls_event_ON_;
+    procedure _WndDBG_visualControls_event_OF_;
+  protected
+    procedure _WndDBG_settings_SAVE_;
+    procedure _WndDBG_settings_LOAD_;
+  protected
     function  _WndDBG_lstString_:string;
     procedure _WndDBG_AddString_(const TextMSG:string);
+
   public
     function  wndCaption:string;
     procedure MessageDBG(const MSG:string);
@@ -207,6 +211,8 @@ const _c_welcome_text_=
    _c_text_Line_;
 
 
+{%region --- создание САМИХ визуальных компонентов ---------------- /fold}
+
 procedure _tWndDBG_manager_._WndDBG_crt_btnCLEAR_(const FormDBG:tForm);
 begin
     with TButton.Create(FormDBG) do begin
@@ -228,7 +234,7 @@ begin
         Hint    :=cRes_btnCLEAR_hint;
         ShowHint:=true;
         //---
-        OnClick:=@_WndDBG_btnCLEAR_onClick_;
+        //OnClick:=@_WndDBG_btnCLEAR_onClick_;
     end;
 end;
 
@@ -284,9 +290,6 @@ begin
         //Caption :=cRes_chbStayOnTop_text;
         Hint    :=cRes_logMEMO_hint;
         ShowHint:=true;
-
-        OnClick :=@_WndDBG_chbFreeOnCLOSE_onClick_;
-
     end;
 end;
 
@@ -313,7 +316,6 @@ begin
         Hint    :=cRes_chbStayOnTop_hint;
         ShowHint:=true;
         //------
-        OnClick :=@_WndDBG_chbStayOnTOP_onClick_;
     end;
 end;
 
@@ -343,25 +345,10 @@ begin
     end;
 end;
 
-//---
-
-procedure _tWndDBG_manager_._WndDBG_crt_;
-begin
-   _WndDBG_:=TForm.Create(Application);
-   _WndDBG_.BorderStyle     :=bsSizeToolWin;
-   _WndDBG_.Name:='WndDEBUG__'+_pkgName_; //< ОБЯЗАТЕЛЬНО
-   _WndDBG_.Caption:= wndCaption;
-    //---
-   _WndDBG_.OnShow   :=@_WndDBG_onShow_;
-   _WndDBG_.OnClose  :=@_WndDBG_onClose_;
-   _WndDBG_.OnDestroy:=@_WndDBG_onDestroy_;
-    //---
-   _WndDBG_crt_CONTROLS_;
-   _WndDBG_settings_LOAD_;
-end;
+{%endregion}
 
 procedure _tWndDBG_manager_._WndDBG_crt_CONTROLS_;
-begin
+begin // !!! ОЧЕРЕДНОСТЬ создания ВАЖНА (см. получение указателей)
    _WndDBG_crt_btnCLEAR_      (_WndDBG_);
    _WndDBG_crt_btnSAVE_       (_WndDBG_);
    _WndDBG_crt_logMEMO_       (_WndDBG_);
@@ -369,7 +356,7 @@ begin
    _WndDBG_crt_chbFreeOnCLOSE_(_WndDBG_);
 end;
 
-//------------------------------------------------------------------------------
+//-------------------------------- получение указателей на визуальные компоненты
 
 function _tWndDBG_manager_._WndDBG_btnCLEAR_:tButton;
 begin
@@ -396,10 +383,29 @@ begin
    result:=TCheckBox(_WndDBG_.Controls[4]);
 end;
 
+//---
+
+procedure _tWndDBG_manager_._WndDBG_crt_;
+begin
+   _WndDBG_:=TForm.Create(Application);
+   _WndDBG_.BorderStyle     :=bsSizeToolWin;
+   _WndDBG_.Name:='WndDEBUG__'+_pkgName_; //< ОБЯЗАТЕЛЬНО
+   _WndDBG_.Caption:= wndCaption;
+    //---
+   //_WndDBG_.OnShow   :=@_WndDBG_onShow_;
+   //_WndDBG_.OnClose  :=@_WndDBG_onClose_;
+   //_WndDBG_.OnDestroy:=@_WndDBG_onDestroy_;
+    //---
+   _WndDBG_crt_CONTROLS_;
+   _WndDBG_settings_LOAD_;
+end;
+
+
 //------------------------------------------------------------------------------
 
 procedure _tWndDBG_manager_._WndDBG_btnCLEAR_onClick_(Sender:TObject);
 begin
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG','_WndDBG_chbStayOnTOP_onClick_');{$endIf}
     if Assigned(_WndDBG_) then begin
         _WndDBG_logMEMO_.Clear;
     end;
@@ -407,11 +413,13 @@ end;
 
 procedure _tWndDBG_manager_._WndDBG_chbFreeOnCLOSE_onClick_(Sender: TObject);
 begin
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG','_WndDBG_chbFreeOnCLOSE_onClick_');{$endIf}
    _WndDBG_settings_SAVE_;
 end;
 
 procedure _tWndDBG_manager_._WndDBG_chbStayOnTOP_onClick_(Sender: TObject);
 begin
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG','_WndDBG_chbStayOnTOP_onClick_');{$endIf}
     if _WndDBG_chbStayOnTOP_.Checked
     then _WndDBG_.FormStyle:=fsStayOnTop
     else _WndDBG_.FormStyle:=fsNormal;
@@ -427,31 +435,54 @@ const _c_settings_EXT_='.xml';
 procedure _tWndDBG_manager_._WndDBG_settings_Save_;
 var Config: TConfigStorage;
 begin
+   _WndDBG_visualControls_event_OF_;
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG.saveSettings','START');{$endIf}
     try Config:=GetIDEConfigStorage(_WndDBG_.Name+_c_settings_EXT_,false);
+        {$ifdef _DEBUG_}
+        if Assigned(Config)
+        then DEBUG('selfDEBUG.saveSettings','Config isLOAD "'+_WndDBG_.Name+_c_settings_EXT_+'"')
+        else DEBUG('selfDEBUG.saveSettings','Config UNload "'+_WndDBG_.Name+_c_settings_EXT_+'"');
+        {$endIf}
         try // --- галочки
             Config.SetDeleteValue(_c_settings_NAME_StayOnTOP_,_WndDBG_chbStayOnTOP_.Checked,false);
             Config.SetDeleteValue(_c_settings_NAME_FreeCLOSE_,_WndDBG_chbFreeOnCLOSE_.Checked,false);
             // --- размер
             Config.SetDeleteValue('',_WndDBG_.BoundsRect,Rect(0,0,0,0));
+            // ---
+            Config.WriteToDisk;
         finally Config.Free; end;
-    except {жестоко как-то, мож по изящнее надо?} end;
+        {$ifdef _DEBUG_}DEBUG('selfDEBUG.saveSettings','END');{$endIf}
+    except {жестоко как-то, мож по изящнее надо?}
+        {$ifdef _DEBUG_}DEBUG('selfDEBUG.saveSettings','FAIL 00');{$endIf}
+    end;
+   _WndDBG_visualControls_event_ON_;
 end;
 
 procedure _tWndDBG_manager_._WndDBG_settings_LOAD_;
 var Config: TConfigStorage;
     r:trect;
 begin
+   _WndDBG_visualControls_event_OF_;
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG.loadSettings','START');{$endIf}
     try Config:=GetIDEConfigStorage(_WndDBG_.Name+_c_settings_EXT_,true);
+        {$ifdef _DEBUG_}
+        if Assigned(Config)
+        then DEBUG('selfDEBUG.loadSettings','Config isLOAD "'+_WndDBG_.Name+_c_settings_EXT_+'"')
+        else DEBUG('selfDEBUG.loadSettings','Config UNload "'+_WndDBG_.Name+_c_settings_EXT_+'"');
+        {$endIf}
         try // --- галочки
-           _WndDBG_chbStayOnTOP_.Checked:=Config.GetValue(_c_settings_NAME_StayOnTOP_,true);
+           _WndDBG_chbStayOnTOP_.Checked:=Config.GetValue(_c_settings_NAME_StayOnTOP_,false);
            _WndDBG_chbFreeOnCLOSE_.Checked:=Config.GetValue(_c_settings_NAME_FreeCLOSE_,false);
             // --- размер
             Config.GetValue('',r,_WndDBG_.BoundsRect);
            _WndDBG_.BoundsRect:=r;
-            // мож тут проверку какйю ???
-            // if screen.DesktopRect.Left:=;
+            // мож тут проверку какйю ??? // if screen.DesktopRect.Left:=;
         finally Config.Free; end;
-    except {жестоко как-то, мож по изящнее надо?} end;
+        {$ifdef _DEBUG_}DEBUG('selfDEBUG.loadSettings','END');{$endIf}
+    except {жестоко как-то, мож по изящнее надо?}
+        {$ifdef _DEBUG_}DEBUG('selfDEBUG.loadSettings','FAIL 00');{$endIf}
+    end;
+   _WndDBG_visualControls_event_ON_;
 end;
 
 
@@ -482,9 +513,43 @@ end;
 
 //------------------------------------------------------------------------------
 
+procedure _tWndDBG_manager_._WndDBG_visualControls_event_ON_;
+begin
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG._WndDBG_visualControls_event_ON_','StART');{$endIf}
+   _WndDBG_chbFreeOnCLOSE_.OnClick:=@_WndDBG_chbFreeOnCLOSE_onClick_;
+   _WndDBG_chbStayOnTOP_  .OnClick:=@_WndDBG_chbStayOnTOP_onClick_;
+    //---
+   _WndDBG_btnCLEAR_.OnClick:=@_WndDBG_btnCLEAR_onClick_;
+   _WndDBG_btnSAVE_ .OnClick:=nil;
+    //---
+   _WndDBG_.OnDestroy:=@_WndDBG_onDestroy_;
+   _WndDBG_.OnClose  :=@_WndDBG_onClose_;
+   _WndDBG_.OnShow   :=@_WndDBG_onShow_;
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG._WndDBG_visualControls_event_ON_','EnD');{$endIf}
+end;
+
+procedure _tWndDBG_manager_._WndDBG_visualControls_event_OF_;
+begin
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG._WndDBG_visualControls_event_OF_','StART');{$endIf}
+   _WndDBG_chbFreeOnCLOSE_.OnClick:=nil;
+   _WndDBG_chbStayOnTOP_  .OnClick:=nil;
+    //---
+   _WndDBG_btnCLEAR_      .OnClick:=nil;
+   _WndDBG_btnSAVE_       .OnClick:=nil;
+    //---
+   _WndDBG_.OnDestroy:=nil;
+   _WndDBG_.OnClose  :=nil;
+   _WndDBG_.OnShow   :=nil;
+    {$ifdef _DEBUG_}DEBUG('selfDEBUG._WndDBG_visualControls_event_OF_','EnD');{$endIf}
+end;
+
+//------------------------------------------------------------------------------
+
+
 
 procedure _tWndDBG_manager_._WndDBG_onShow_(Sender: TObject);
 begin
+    // втавляем строку разделитель
     if (_WndDBG_logMEMO_.Lines.Count>0)and(_WndDBG_lstString_<>_c_text_Line_)
     then _WndDBG_AddString_(_c_text_Line_)
 end;
@@ -535,7 +600,7 @@ end;
 
 procedure _tWndDBG_manager_.MessageDBG(const MSG:string);
 begin
-    //if Assigned(_WndDBG_) and (_WndDBG_.Visible) then _WndDBG_.Message(MSG);
+    if Assigned(_WndDBG_) {and (_WndDBG_.Visible)} then _WndDBG_AddString_(MSG);
 end;
 
 {%endregion}
@@ -557,7 +622,7 @@ end;
 
 procedure LazarusIDE_CLEAR;
 begin
-   {_WndDBG_manager_.FREE;}
+   _WndDBG_manager_.FREE;
 end;
 
 //------------------------------------------------------------------------------
@@ -576,7 +641,7 @@ end;
 
 procedure in0k_lazIde_DEBUG(const msgTEXT:string);
 begin
-    //if Assigned(_WndDBG_manager_) then _WndDBG_manager_.MessageDBG(msgTEXT);
+    if Assigned(_WndDBG_manager_) then _WndDBG_manager_.MessageDBG(msgTEXT);
 end;
 
 const
@@ -619,7 +684,7 @@ end;
 {%endregion}
 
 initialization
-//_WndDBG_manager_:=nil;
+_WndDBG_manager_:=nil;
 
 end.
 
