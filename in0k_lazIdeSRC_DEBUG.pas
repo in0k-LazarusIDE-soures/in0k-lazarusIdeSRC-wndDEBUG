@@ -4,6 +4,7 @@ interface
 {.$define _DEBUG_} //< САМОдеБАГ
 
 uses Classes, SysUtils, Controls, StdCtrls, ActnList, Forms, windows, Types,
+     IDEOptionsIntf,
      IDEWindowIntf, MenuIntf,       //< да ... необходимо использовать IdeINTf
      BaseIDEIntf, LazConfigStorage; //< для настроек
 
@@ -300,6 +301,10 @@ begin
         Text:=_c_text_Line_+LineEnding+_c_text_welcome_+LineEnding+_c_text_Line_;
         Hint:=_c_text_welcome_;
         ShowHint:=true;
+        //---
+        font.Name:='Consolas';//IDEEditorOptions.  .EditorFont;
+        font.Size:=8;
+        //font.IsMonoSpace;
     end;
 end;
 
