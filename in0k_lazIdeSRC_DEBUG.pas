@@ -29,6 +29,9 @@ function  mthd2txt(const p:pMethod):string; inline;
 
 function  inttostr(const v:integer):string; inline;
 
+function BoolToStr(B:Boolean; const TrueS,FalseS:string): string; inline;
+
+
 implementation
 
 {%region --- _tWndDBG_manager_ ------------------------------------ /fold}
@@ -540,6 +543,7 @@ var tmp:string;
 begin
     DateTimeToString(tmp,_cDateTimeFormat_,now);
     if Assigned(_wndDBG_) then _WndDBG_AddString_(tmp+_cSpaceCharacter_+MSG);
+    Application.ProcessMessages;
 end;
 
 {%endregion}
@@ -599,6 +603,11 @@ begin
     if msgTYPE<>''
     then in0k_lazIde_DEBUG(_c_bOPN_+msgTYPE+_c_bCLS_+_c_PRBL_+msgTEXT)
     else in0k_lazIde_DEBUG(                                   msgTEXT);
+end;
+
+function BoolToStr(B:Boolean; const TrueS,FalseS:string):string;
+begin
+    result:=SysUtils.BoolToStr(B, TrueS,FalseS);
 end;
 
 function inttostr(const v:integer):string; inline;
