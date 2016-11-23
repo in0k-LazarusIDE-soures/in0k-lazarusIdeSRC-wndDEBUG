@@ -29,6 +29,7 @@ function  mthd2txt(const p:pMethod):string; inline;
 
 function  inttostr(const v:integer):string; inline;
 
+function BoolToStr(B:Boolean): string; inline;
 function BoolToStr(B:Boolean; const TrueS,FalseS:string): string; inline;
 
 
@@ -608,6 +609,11 @@ end;
 function BoolToStr(B:Boolean; const TrueS,FalseS:string):string;
 begin
     result:=SysUtils.BoolToStr(B, TrueS,FalseS);
+end;
+
+function BoolToStr(B:Boolean):string;
+begin
+    result:=BoolToStr(B,'true','false');
 end;
 
 function inttostr(const v:integer):string; inline;
