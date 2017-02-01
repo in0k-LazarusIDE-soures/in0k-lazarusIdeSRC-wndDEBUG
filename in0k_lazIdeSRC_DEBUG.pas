@@ -16,6 +16,10 @@ procedure LazarusIDE_ShowDBG;
 procedure DEBUG(const         msgTEXT:string);
 procedure DEBUG(const msgTYPE,msgTEXT:string);
 
+function  Assigned2OK(const p:pointer):string;
+
+
+
 procedure in0k_lazIde_DEBUG(const         msgTEXT:string); inline;
 procedure in0k_lazIde_DEBUG(const msgTYPE,msgTEXT:string); inline;
 
@@ -614,6 +618,14 @@ end;
 function BoolToStr(B:Boolean):string;
 begin
     result:=BoolToStr(B,'true','false');
+end;
+
+function Assigned2OK(const p:pointer):string;
+begin
+    if Assigned(P)
+    then result:='ok'
+    else result:='ER';
+    result:=_c_bOPN_+result+_c_bCLS_;
 end;
 
 function inttostr(const v:integer):string; inline;
