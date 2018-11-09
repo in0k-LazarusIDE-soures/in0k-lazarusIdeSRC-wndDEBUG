@@ -1,4 +1,7 @@
-unit in0k_lazIdeSRC_DEBUG;
+unit in0k_lazarusIdeSRC__wndDEBUG;
+//
+//
+
 {$mode objfpc}{$H+}
 interface
 {.$define _DEBUG_} //< САМОдеБАГ
@@ -8,33 +11,27 @@ uses Classes, SysUtils, Controls, StdCtrls, ActnList, Forms, windows, Types,
      IDEWindowIntf, MenuIntf,       //< да ... необходимо использовать IdeINTf
      BaseIDEIntf, LazConfigStorage; //< для настроек
 
+procedure SetUpInIDE(const pkgClassNAME:string);
+procedure ShowWindow;
 
-procedure LazarusIDE_SetUP (const pkgClassNAME:string);
-procedure LazarusIDE_CLEAR;
-procedure LazarusIDE_ShowDBG;
+procedure in0k_lazarusIdeSRC_DEBUG(const msgText:string); inline;
 
-procedure DEBUG(const         msgTEXT:string);
-procedure DEBUG(const msgTYPE,msgTEXT:string);
-
-function  Assigned2OK(const p:pointer):string;
-
-
-
-procedure in0k_lazIde_DEBUG(const         msgTEXT:string); inline;
-procedure in0k_lazIde_DEBUG(const msgTYPE,msgTEXT:string); inline;
+procedure DEBUG(const msgTYPE,msgTEXT:string); inline;
+procedure DEBUG(const         msgTEXT:string); inline;
 
 //------------------------------------------------------------------------------
 
 type pMethod=^tMethod;
 
-function  addr2str(const p:pointer):string; inline;
-function  addr2txt(const p:pointer):string; inline;
-function  mthd2txt(const p:pMethod):string; inline;
+function inttostr(const v:integer):string; inline;
+function addr2str(const p:pointer):string; inline;
+function addr2txt(const p:pointer):string; inline;
+function mthd2txt(const p:pMethod):string; inline;
+function bool2Str(const b:boolean):string; inline;
+function bool2Str(const b:boolean; const str4True,str4False:string): string; inline;
 
-function  inttostr(const v:integer):string; inline;
-
-function BoolToStr(B:Boolean): string; inline;
-function BoolToStr(B:Boolean; const TrueS,FalseS:string): string; inline;
+//function  Assigned2OK(const p:pointer):string;
+//         Assgn2OK(const p:pointer):string;
 
 
 implementation
@@ -43,7 +40,7 @@ implementation
 
 const
   _c_wndName_textStart_='WndDBG__';
-  _c_caption_textStart_='[eventLOG] ';
+  _c_caption_textStart_='[debugLOG] ';
 
 type
 _tWndDBG_manager_=class
@@ -95,7 +92,7 @@ _tWndDBG_manager_=class
     destructor DESTROY; override;
   end;
 
-var
+var // !!!SINGLETON!!!
 _WndDBG_manager_:_tWndDBG_manager_;
 
 //==============================================================================
@@ -513,6 +510,7 @@ begin
             SelLength:=0;
             SelStart :=0;
         Lines.EndUpdate;
+        Repaint; //< это ВСМЕСТО `Application.ProcessMessages` из `_tWndDBG_manager_.MessageDBG`
     end;
 end;
 
@@ -548,54 +546,48 @@ var tmp:string;
 begin
     DateTimeToString(tmp,_cDateTimeFormat_,now);
     if Assigned(_wndDBG_) then _WndDBG_AddString_(tmp+_cSpaceCharacter_+MSG);
-    Application.ProcessMessages;
+    //Application.ProcessMessages; <--- НЕЛЬЗЯ !!!
 end;
 
 {%endregion}
 //------------------------------------------------------------------------------
 
-procedure LazarusIDE_SetUP(const pkgClassNAME:string);
+procedure SetUpInIDE(const pkgClassNAME:string);
 begin
     if not Assigned(_WndDBG_manager_) then begin
-        // создаем САМО окно
+        // создаем МЕНЕДЖЕР окна
        _WndDBG_manager_:=_tWndDBG_manager_.Create(pkgClassNAME);
         // создаем пункт меню для него
         RegisterIDEMenuCommand(itmViewIDEInternalsWindows, _WndDBG_manager_._WndDBG_clc_Caption_,_WndDBG_manager_._WndDBG_clc_Caption_,@_WndDBG_manager_._doShowWindow_,nil);
     end;
 end;
 
-procedure LazarusIDE_CLEAR;
+{procedure LazarusIDE_CLEAR;
 begin
     if Assigned(_WndDBG_manager_) then begin
        _WndDBG_manager_.FREE;
        _WndDBG_manager_:=nil;
     end;
-end;
+end;}
 
-procedure LazarusIDE_ShowDBG;
+procedure ShowWindow;
 begin
     if Assigned(_WndDBG_manager_) then begin
         _WndDBG_manager_.ShowWndDBG;
     end;
 end;
 
+
 //------------------------------------------------------------------------------
+
+procedure in0k_lazarusIdeSRC_DEBUG(const msgText:string);
+begin
+    if Assigned(_WndDBG_manager_) then _WndDBG_manager_.MessageDBG(msgTEXT);
+end;
 
 procedure DEBUG(const msgTEXT:string);
 begin
-    in0k_lazIde_DEBUG(msgTEXT);
-end;
-
-procedure DEBUG(const msgTYPE,msgTEXT:string);
-begin
-    in0k_lazIde_DEBUG(msgTYPE,msgTEXT);
-end;
-
-//------------------------------------------------------------------------------
-
-procedure in0k_lazIde_DEBUG(const msgTEXT:string);
-begin
-    if Assigned(_WndDBG_manager_) then _WndDBG_manager_.MessageDBG(msgTEXT);
+    in0k_lazarusIdeSRC_DEBUG(msgTEXT);
 end;
 
 const
@@ -603,19 +595,21 @@ const
   _c_bCLS_=']';
   _c_PRBL_=' '; //< ^-) изменить имя
 
-procedure in0k_lazIde_DEBUG(const msgTYPE,msgTEXT:string);
+procedure DEBUG(const msgTYPE,msgTEXT:string);
 begin
     if msgTYPE<>''
-    then in0k_lazIde_DEBUG(_c_bOPN_+msgTYPE+_c_bCLS_+_c_PRBL_+msgTEXT)
-    else in0k_lazIde_DEBUG(                                   msgTEXT);
+    then DEBUG(_c_bOPN_+msgTYPE+_c_bCLS_+_c_PRBL_+msgTEXT)
+    else DEBUG(                                   msgTEXT);
 end;
 
-function BoolToStr(B:Boolean; const TrueS,FalseS:string):string;
+//------------------------------------------------------------------------------
+
+function bool2Str(const b:boolean; const str4True,str4False:string):string;
 begin
-    result:=SysUtils.BoolToStr(B, TrueS,FalseS);
+    result:=SysUtils.BoolToStr(B, str4True,str4False);
 end;
 
-function BoolToStr(B:Boolean):string;
+function bool2Str(const b:boolean):string;
 begin
     result:=BoolToStr(B,'true','false');
 end;
@@ -659,8 +653,8 @@ initialization
 _WndDBG_manager_:=nil;
 finalization
  if Assigned(_WndDBG_manager_) then begin
-     _WndDBG_manager_.FREE;
-     _WndDBG_manager_:=nil;
+  _WndDBG_manager_.FREE;
+  _WndDBG_manager_:=nil;
  end;
 end.
 
