@@ -7,7 +7,6 @@ interface
 {.$define _DEBUG_} //< САМОдеБАГ
 
 uses Classes, SysUtils, Controls, StdCtrls, ActnList, Forms, windows, Types,
-     IDEOptionsIntf,
      IDEWindowIntf, MenuIntf,       //< да ... необходимо использовать IdeINTf
      BaseIDEIntf, LazConfigStorage; //< для настроек
 
