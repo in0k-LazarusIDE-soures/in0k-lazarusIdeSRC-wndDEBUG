@@ -20,12 +20,13 @@ procedure DEBUG(const         msgTEXT:string); inline;
 
 //------------------------------------------------------------------------------
 
-type pMethod=^tMethod;
+//type pMethod=^tMethod;
 
 function inttostr(const v:integer):string; inline;
 function addr2str(const p:pointer):string; inline;
 function addr2txt(const p:pointer):string; inline;
 function mthd2txt(const p:pMethod):string; inline;
+function mthd2txt(const m:tMethod):string; inline;
 function bool2Str(const b:boolean):string; inline;
 function bool2Str(const b:boolean; const str4True,str4False:string): string; inline;
 
@@ -644,6 +645,11 @@ end;
 function mthd2txt(const p:pMethod):string;
 begin
     result:=_c_addr2txt_SMB_+addr2str(p^.Code)+_c_addr2txt_DVT_+addr2str(p^.Data)
+end;
+
+function mthd2txt(const m:tMethod):string;
+begin
+    result:=_c_addr2txt_SMB_+addr2str(m.Code)+_c_addr2txt_DVT_+addr2str(m.Data)
 end;
 
 {%endregion}
