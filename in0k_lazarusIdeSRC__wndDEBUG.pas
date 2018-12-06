@@ -20,7 +20,7 @@ procedure DEBUG(const         msgTEXT:string); inline;
 
 //------------------------------------------------------------------------------
 
-//type pMethod=^tMethod;
+type pMethod=^tMethod;
 
 function inttostr(const v:integer):string; inline;
 function addr2str(const p:pointer):string; inline;
