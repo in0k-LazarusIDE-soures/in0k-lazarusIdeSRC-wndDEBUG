@@ -6,7 +6,8 @@ unit in0k_lazarusIdeSRC__wndDEBUG;
 interface
 {.$define _DEBUG_} //< САМОдеБАГ
 
-uses Classes, SysUtils, Controls, StdCtrls, ActnList, Forms, windows, Types,
+uses Classes, SysUtils, Controls, StdCtrls, ActnList, Forms,  Types,
+     LCLType, LCLIntf,
      IDEWindowIntf, MenuIntf,       //< да ... необходимо использовать IdeINTf
      BaseIDEIntf, LazConfigStorage; //< для настроек
 
